@@ -126,9 +126,16 @@ describe("NGINX conf compiler", function()
   describe("compile_nginx_conf()", function()
     it("compiles a main NGINX conf", function()
       local nginx_conf = prefix_handler.compile_nginx_conf(helpers.test_conf)
-      assert.matches("user nobody nobody;", nginx_conf, nil, true)
+      assert.not_matches("user nobody nobody;", nginx_conf, nil, true)
       assert.matches("worker_processes 1;", nginx_conf, nil, true)
       assert.matches("daemon on;", nginx_conf, nil, true)
+    end)
+    it("compiles with user directive", function()
+      local conf = assert(conf_loader(helpers.test_conf_path, {
+        nginx_user = "www_data www_data"
+      }))
+      local nginx_conf = prefix_handler.compile_nginx_conf(conf)
+      assert.matches("user www_data www_data;", nginx_conf, nil, true)
     end)
     it("compiles with custom conf", function()
       local conf = assert(conf_loader(helpers.test_conf_path, {
